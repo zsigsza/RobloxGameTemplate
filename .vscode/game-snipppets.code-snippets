@@ -1,0 +1,33 @@
+{
+    "Producer": {
+        "prefix":[ "producer"],
+        "body": [
+            "import { createProducer } from \"@rbxts/reflex\";",
+            "",
+            "export interface ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}State {}",
+            "",
+            "const initialState: ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}State = {};",
+            "",
+            "export const ${TM_FILENAME_BASE/(.*)/${1:/camelcase}/g}Slice = createProducer(initialState, {});"
+		]
+    },
+    "Hook": {
+        "prefix": ["hook"],
+        "body": [
+            "import { Lifecycle } from \"common/shared/modding/lifecycle\";",
+            "import { Hook } from \"common/shared/classes/hook\";",
+            "",
+            "export class ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g} extends Hook {",
+            "\tprivate readonly ${TM_FILENAME_BASE/(.*)/${1:/camelcase}/g}Listener = new Lifecycle<T>();",
+            "\tregisterHook(): void {",
+            "\t\tthis.${TM_FILENAME_BASE/(.*)/${1:/camelcase}/g}Listener.register();",
+            "\t}",
+            "",
+            "\tconnectHook(): void {",
+            "\t\t$1",
+            "\t}",
+            "}"
+        ]
+    }
+
+}
