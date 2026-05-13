@@ -1,0 +1,24 @@
+on:
+ push:
+
+jobs:
+ lint: 
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+    - uses: CompeyDev/setup-rokit@v0.1.2
+    - uses: oven-sh/setup-bun@v2
+      with:
+       bun-version: latest
+
+    - name: install packages
+      run: bun i
+
+    - name: run linter
+      run: bun run eslint
+
+    - name: compile base
+      run: bun compile:base
+    
+    - name: run tests
+      run: bun test:base

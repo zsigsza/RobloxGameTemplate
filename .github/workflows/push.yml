@@ -1,0 +1,50 @@
+on:
+ workflow_dispatch:        
+ push: 
+  paths-ignore: 
+    - "package.json"
+    - "*README.md"
+  branches: [main]
+
+jobs:
+ lint:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+    - uses: CompeyDev/setup-rokit@v0.1.2
+    - uses: oven-sh/setup-bun@v2
+      with:
+       bun-version: latest    
+
+    - name: install packages
+      run: bun i
+
+    - name: run linter
+      run: bun run eslint
+
+ deploy:
+  needs: lint
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+    - uses: CompeyDev/setup-rokit@v0.1.2
+    - uses: oven-sh/setup-bun@v2
+      with:
+       bun-version: latest
+
+    - name: install packages
+      run: bun i
+    
+    - name: compile project
+      run: bun compile:base
+    
+    - name: build production
+      run: bun prod:base
+
+    - name: deploy
+      env:
+        UID: ${{vars.UNIVERSE}}
+        BASE: ${{vars.PLACE}}
+        API_KEY: ${{secrets.RBX_CLOUD}}
+        FILE: places/BASE/build.rbxl
+      run: rbxcloud experience publish -a "$API_KEY" -u "$UID" -p "$BASE" -t published -f "$FILE" 
