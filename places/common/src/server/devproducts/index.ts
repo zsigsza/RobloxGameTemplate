@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+
 export type DevProductPurchaseEvent = (receiptInfo: ReceiptInfo, player: Player) => void;
 
 export const developerProducts: Record<number, DevProductPurchaseEvent> = {

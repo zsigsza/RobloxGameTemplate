@@ -58,7 +58,7 @@ do
 					}),
 				}))(data)
 			end,
-			dataStore = DataStoreService:GetDataStore("PlayerData"),
+			dataStore = DataStoreService:GetDataStore("PlayerData1"),
 			default = defaultPlayerData,
 			migrations = nil,
 			lockSessions = true,
@@ -100,12 +100,15 @@ do
 		local _documents = self.documents
 		local _userId = player.UserId
 		local document = _documents[_userId]
-		if not document then
+		if not IS_STUDIO and not document then
 			return Enum.ProductPurchaseDecision.NotProcessedYet
 		end
 		local recentPurchases = store:getState(selectPlayerRecentPurchases(player.Name))
 		local _purchaseId = receiptInfo.PurchaseId
 		if table.find(recentPurchases, _purchaseId) ~= nil then
+			if IS_STUDIO then
+				return Enum.ProductPurchaseDecision.PurchaseGranted
+			end
 			local _binding_1 = document:Save()
 			local success = _binding_1.success
 			return if success then Enum.ProductPurchaseDecision.PurchaseGranted else Enum.ProductPurchaseDecision.NotProcessedYet
@@ -134,6 +137,9 @@ do
 		if #newRecentPurchases > RECENT_PURCHASES_LIMIT then
 			store.limitRecentPurchases(player.Name)
 		end
+		if IS_STUDIO then
+			return Enum.ProductPurchaseDecision.PurchaseGranted
+		end
 		local result = document:Save()
 		if not result.success then
 			return Enum.ProductPurchaseDecision.NotProcessedYet
@@ -141,7 +147,9 @@ do
 		return Enum.ProductPurchaseDecision.PurchaseGranted
 	end
 	function PlayerSaveService:onStart()
-		MarketplaceService.ProcessReceipt = self.processReceipt
+		MarketplaceService.ProcessReceipt = function(receiptInfo)
+			return self:processReceipt(receiptInfo)
+		end
 	end
 	function PlayerSaveService:onPlayerJoin(player)
 		print(`{player.Name} joined`)
@@ -158,7 +166,16 @@ do
 		if not player:IsDescendantOf(Players) then
 			return nil
 		end
-		local result = document:Open()
+		local result
+		local _exitType, _returns = TS.try(function()
+			result = document:Open()
+		end, function(error)
+			player:Kick(`Failed to load data: {error}. Please rejoin`)
+			return TS.TRY_RETURN, {}
+		end)
+		if _exitType then
+			return unpack(_returns)
+		end
 		-- DocumentService retries 5 times over 16 seconds, so it is safe to steal
 		-- after a failed `:Open`!
 		if not result.success and result.reason == "SessionLockedError" then

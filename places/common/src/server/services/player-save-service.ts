@@ -58,14 +58,16 @@ export class PlayerSaveService implements OnPlayerLeave, OnPlayerJoin, OnStart {
 		}
 
 		const document = this.documents.get(player.UserId);
-		if (!document) {
+		if (!IS_STUDIO && !document) {
 			return Enum.ProductPurchaseDecision.NotProcessedYet;
 		}
 
 		const recentPurchases = store.getState(selectPlayerRecentPurchases(player.Name));
 
 		if (recentPurchases.includes(receiptInfo.PurchaseId)) {
-			const { success } = document.Save();
+			if (IS_STUDIO) return Enum.ProductPurchaseDecision.PurchaseGranted;
+
+			const { success } = document!.Save();
 			return success
 				? Enum.ProductPurchaseDecision.PurchaseGranted
 				: Enum.ProductPurchaseDecision.NotProcessedYet;
@@ -90,7 +92,9 @@ export class PlayerSaveService implements OnPlayerLeave, OnPlayerJoin, OnStart {
 			store.limitRecentPurchases(player.Name);
 		}
 
-		const result = document.Save();
+		if (IS_STUDIO) return Enum.ProductPurchaseDecision.PurchaseGranted;
+
+		const result = document!.Save();
 		if (!result.success) {
 			return Enum.ProductPurchaseDecision.NotProcessedYet;
 		}
@@ -111,7 +115,7 @@ export class PlayerSaveService implements OnPlayerLeave, OnPlayerJoin, OnStart {
 
 		this.store = new DocumentStore({
 			check: (data) => Flamework.createGuard<PlayerSave>()(data),
-			dataStore: DataStoreService.GetDataStore("PlayerData"),
+			dataStore: DataStoreService.GetDataStore("PlayerData1"),
 			default: defaultPlayerData,
 
 			/**
@@ -124,7 +128,7 @@ export class PlayerSaveService implements OnPlayerLeave, OnPlayerJoin, OnStart {
 	}
 
 	onStart(): void {
-		MarketplaceService.ProcessReceipt = this.processReceipt;
+		MarketplaceService.ProcessReceipt = (receiptInfo: ReceiptInfo) => this.processReceipt(receiptInfo);
 	}
 
 	onPlayerJoin(player: Player): void {
@@ -145,7 +149,13 @@ export class PlayerSaveService implements OnPlayerLeave, OnPlayerJoin, OnStart {
 			return;
 		}
 
-		let result: OpenResult<PlayerSave> = document.Open();
+		let result: OpenResult<PlayerSave>;
+		try {
+			result = document.Open();
+		} catch (error) {
+			player.Kick(`Failed to load data: ${error}. Please rejoin`);
+			return;
+		}
 
 		// DocumentService retries 5 times over 16 seconds, so it is safe to steal
 		// after a failed `:Open`!

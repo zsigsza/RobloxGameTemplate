@@ -3,3 +3,5 @@
 /include
 *.tsbuildinfo
 flamework.build
+places/base/out/common
+places/base/out/base
