@@ -132,7 +132,6 @@ export class PlayerSaveService implements OnPlayerLeave, OnPlayerJoin, OnStart {
 	}
 
 	onPlayerJoin(player: Player): void {
-		print(`${player.Name} joined`);
 		const userId = player.UserId;
 		const [saveError] = this.canSave();
 
