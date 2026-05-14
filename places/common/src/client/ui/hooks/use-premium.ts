@@ -1,4 +1,4 @@
-import { LocalPlayer } from "common/client/constants/local-player";
+import { localPlayer } from "common/client/constants/local-player";
 import { useEventListener } from "@rbxts/pretty-react-hooks";
 import { Players } from "@rbxts/services";
 import { useState } from "@rbxts/react";
@@ -10,10 +10,10 @@ import { useState } from "@rbxts/react";
  * @returns True if the local player has a premium membership.
  */
 export function usePremium(): boolean {
-	const [isPremium, setIsPremium] = useState(LocalPlayer.MembershipType === Enum.MembershipType.Premium);
+	const [isPremium, setIsPremium] = useState(localPlayer.MembershipType === Enum.MembershipType.Premium);
 
 	useEventListener(Players.PlayerMembershipChanged, (player) => {
-		if (player === LocalPlayer) {
+		if (player === localPlayer) {
 			setIsPremium(player.MembershipType === Enum.MembershipType.Premium);
 		}
 	});

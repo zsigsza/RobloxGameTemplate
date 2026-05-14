@@ -1,5 +1,5 @@
 import { selectPlayerClicks } from "common/shared/store/player/stat";
-import { LocalPlayer } from "common/client/constants/local-player";
+import { localPlayer } from "common/client/constants/local-player";
 import remotes, { RemoteId } from "common/shared/remotes";
 import { useRem } from "common/client/ui/hooks/use-rem";
 import Layer from "common/client/ui/primitives/layer";
@@ -9,7 +9,7 @@ import React from "@rbxts/react";
 export default function App() {
 	const rem = useRem();
 
-	const count = useSelector(selectPlayerClicks(LocalPlayer.Name));
+	const count = useSelector(selectPlayerClicks(localPlayer.Name));
 
 	return (
 		<>

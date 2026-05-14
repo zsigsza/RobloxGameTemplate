@@ -1,5 +1,5 @@
 import { OnLocalCharacterRemoving, OnLocalCharacterAdded } from "common/client/hooks";
-import { LocalPlayer } from "common/client/constants/local-player";
+import { localPlayer } from "common/client/constants/local-player";
 import { Lifecycle } from "common/shared/modding/lifecycle";
 import { Controller, OnStart } from "@flamework/core";
 
@@ -11,11 +11,11 @@ export class LocalCharacterHookController implements OnStart {
 		this.characterAdded.register();
 		this.characterRemoving.register();
 
-		this.characterAdded.connect(LocalPlayer.CharacterAdded, (l, m) => l.onLocalCharacterAdded(m));
-		this.characterRemoving.connect(LocalPlayer.CharacterRemoving, (l, m) => l.onLocalCharacterRemoving(m));
+		this.characterAdded.connect(localPlayer.CharacterAdded, (l, m) => l.onLocalCharacterAdded(m));
+		this.characterRemoving.connect(localPlayer.CharacterRemoving, (l, m) => l.onLocalCharacterRemoving(m));
 
 		task.spawn(() => {
-			const character = LocalPlayer.Character;
+			const character = localPlayer.Character;
 			if (!character) {
 				return;
 			}

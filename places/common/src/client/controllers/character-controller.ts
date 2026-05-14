@@ -1,4 +1,4 @@
-import { LocalPlayer } from "common/client/constants/local-player";
+import { localPlayer } from "common/client/constants/local-player";
 import { OnLocalCharacterAdded } from "common/client/hooks";
 import { getHumanoid } from "common/shared/utils/player";
 import { Controller, OnStart } from "@flamework/core";
@@ -13,7 +13,7 @@ export class CharacterController implements OnLocalCharacterAdded, OnStart {
 	rootJoint: undefined | Motor6D;
 
 	onStart() {
-		const [humanoid, character] = getHumanoid(LocalPlayer);
+		const [humanoid, character] = getHumanoid(localPlayer);
 
 		this.humanoid = humanoid;
 		this.character = character;
@@ -28,7 +28,7 @@ export class CharacterController implements OnLocalCharacterAdded, OnStart {
 		}
 	}
 
-	onLocalCharacterAdded(_character: Model): void {
+	onLocalCharacterAdded(): void {
 		this.onStart();
 	}
 }

@@ -3,6 +3,7 @@ import remotes, { RemoteId } from "common/shared/remotes";
 import { IS_EDIT } from "common/shared/constants/game";
 import { sharedSlices } from "common/shared/store";
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export function broadcasterMiddleware(): ProducerMiddleware {
 	if (IS_EDIT) {
 		return () => (dispatch) => dispatch;
