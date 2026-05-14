@@ -50,6 +50,7 @@
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-roblox-ts": "^0.0.36",
         "eslint-plugin-unused-imports": "^4.4.1",
+        "husky": "^9.1.7",
         "prettier": "^3.8.1",
         "rbxts-transformer-access": "^1.1.2",
         "rbxts-transformer-flamework": "^1.3.2",
@@ -59,6 +60,9 @@
       },
     },
   },
+  "trustedDependencies": [
+    "husky",
+  ],
   "packages": {
     "@babel/code-frame": ["@babel/code-frame@7.12.11", "", { "dependencies": { "@babel/highlight": "^7.10.4" } }, "sha512-Zt1yodBx1UcyiePMSkWnU4hPqhwq7hGi2nFL1LeA3EUl+q2LQx16MISgJ0+z7dnmgvP9QtIleuETGOiOH1RcIw=="],
 
@@ -705,6 +709,8 @@
     "hasown": ["hasown@2.0.2", "", { "dependencies": { "function-bind": "^1.1.2" } }, "sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ=="],
 
     "hosted-git-info": ["hosted-git-info@4.0.2", "", { "dependencies": { "lru-cache": "^6.0.0" } }, "sha512-c9OGXbZ3guC/xOlCg1Ci/VgWlwsqDv1yMQL1CWqXDL0hDjXuNcq0zuR4xqPSuasI3kqFDhqSyTjREz5gzq0fXg=="],
+
+    "husky": ["husky@9.1.7", "", { "bin": { "husky": "bin.js" } }, "sha512-5gs5ytaNjBrh5Ow3zrvdUUY+0VxIuWVL4i9irt6friV+BqdCfmV11CQTWMiBYWHbXhco+J1kHfTOUkePhCDvMA=="],
 
     "ignore": ["ignore@7.0.5", "", {}, "sha512-Hs59xBNfUIunMFgWAbGX5cq6893IbWg4KnrjbYwX3tx0ztorVgTDA6B2sxf8ejHJ4wz8BqGUMYlnzNBer5NvGg=="],
 
