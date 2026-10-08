@@ -4,9 +4,9 @@ import { BindingOrValue } from "@rbxts/pretty-react-hooks";
 
 interface CanvasGroupProps extends PropsWithChildren {
 	/** The corner radius for the canvas group. */
-	CornerRadius: BindingOrValue<number>;
+	CornerRadius?: BindingOrValue<number>;
 	/** Whether the canvas group is visible. */
-	Visible: BindingOrValue<boolean>;
+	Visible?: BindingOrValue<boolean>;
 }
 
 /**
@@ -17,7 +17,7 @@ interface CanvasGroupProps extends PropsWithChildren {
  * @example
  *
  * ```tsx
- * <CanvasGroup native={{ Size: new UDim2(0, 100, 0, 100) }}>
+ * <CanvasGroup CornerRadius={8} />
  * ```
  *
  * @component
@@ -35,7 +35,7 @@ const CanvasGroup = forwardRef(
 				Visible={Visible}
 				ref={ref}
 			>
-				{CornerRadius ? <Corner radius={CornerRadius} /> : undefined}
+				{CornerRadius !== undefined ? <Corner radius={CornerRadius} /> : undefined}
 				{children}
 			</canvasgroup>
 		);

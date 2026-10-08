@@ -13,13 +13,13 @@ interface CornerProps {
  * This component is used to apply a corner radius to UI elements.
  *
  * @param props - The properties for the Corner component.
- * @param props.Radius - The radius of the corner in pixels.
+ * @param props.radius - The radius of the corner in pixels.
  *
  * @returns - A React element representing a UI corner with the specified radius.
  *
  * @example
  * ```tsx
- * <Corner Radius={10} />
+ * <Corner radius={10} />
  * ```
  */
 export function Corner({ radius }: CornerProps) {

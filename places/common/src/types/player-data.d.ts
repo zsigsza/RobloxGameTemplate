@@ -8,5 +8,5 @@ interface PlayerStats {
 }
 
 interface PlayerPurchases {
-	readonly recentPurchases: Array<string>;
+	readonly recentPurchases: ReadonlyArray<string>;
 }

@@ -1,25 +1,28 @@
-import { OnPlayerLeave, OnPlayerJoin } from "common/server/hooks";
+import { OnPlayerLeave } from "common/server/hooks";
 import { Service } from "@flamework/core";
 import { Trove } from "@rbxts/trove";
 
-@Service()
-export class JunkService implements OnPlayerLeave, OnPlayerJoin {
-	troveObjects = new Map<number, Trove>();
-
-	onPlayerJoin(player: Player) {
-		this.troveObjects.set(player.UserId, new Trove());
-	}
+/** Tracks per-player objects (connections, instances, ...) and cleans them up when the player leaves. */
+@Service({})
+export class JunkService implements OnPlayerLeave {
+	private readonly troves = new Map<number, Trove>();
 
 	onPlayerLeave(player: Player) {
-		this.troveObjects.get(player.UserId)?.clean();
-		this.troveObjects.delete(player.UserId);
+		this.clean(player);
 	}
 
 	addJunk(player: Player, junk: Trove.Trackable) {
-		this.troveObjects.get(player.UserId)?.add(junk);
+		let trove = this.troves.get(player.UserId);
+		if (!trove) {
+			trove = new Trove();
+			this.troves.set(player.UserId, trove);
+		}
+
+		trove.add(junk);
 	}
 
 	clean(player: Player) {
-		this.troveObjects.get(player.UserId)?.clean();
+		this.troves.get(player.UserId)?.destroy();
+		this.troves.delete(player.UserId);
 	}
 }

@@ -1,8 +1,6 @@
 import { Trove } from "@rbxts/trove";
 
 export abstract class Hook {
-	constructor() {}
-
 	trove = new Trove();
 	connected = false;
 	registered = false;

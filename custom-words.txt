@@ -1,2 +1,5 @@
 gsub
 rbxassetid
+respawn
+respawns
+respawning

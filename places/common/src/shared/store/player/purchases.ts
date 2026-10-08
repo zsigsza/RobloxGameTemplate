@@ -1,7 +1,6 @@
 import { RECENT_PURCHASES_LIMIT } from "common/shared/constants/flags";
 import { SharedState } from "common/shared/store";
 import { createProducer } from "@rbxts/reflex";
-import Sift from "@rbxts/sift";
 
 export interface PurchaseState {
 	readonly [player: string]: PlayerPurchases | undefined;
@@ -9,28 +8,27 @@ export interface PurchaseState {
 
 const initialState: PurchaseState = {};
 
-export const purchasesSlice = createProducer(initialState, {
-	limitRecentPurchases: (state, player: string) => {
-		const purchases = state[player];
-		return {
-			...state,
-			[player]: purchases && {
-				...purchases,
-				recentPurchases: Sift.Array.shift(
-					purchases.recentPurchases,
-					purchases.recentPurchases.size() - RECENT_PURCHASES_LIMIT,
-				),
-			},
-		};
-	},
+function trimRecentPurchases(recentPurchases: ReadonlyArray<string>): ReadonlyArray<string> {
+	const overflow = recentPurchases.size() - RECENT_PURCHASES_LIMIT;
+	if (overflow <= 0) return recentPurchases;
 
+	const trimmed = new Array<string>();
+	for (const index of $range(overflow, recentPurchases.size() - 1)) {
+		trimmed.push(recentPurchases[index]);
+	}
+
+	return trimmed;
+}
+
+export const purchasesSlice = createProducer(initialState, {
 	addRecentPurchase: (state, player: string, recentPurchase: string) => {
 		const purchases = state[player];
 		return {
 			...state,
 			[player]: purchases && {
 				...purchases,
-				recentPurchases: [...purchases.recentPurchases, recentPurchase],
+				// Only keep the newest purchases so the saved data can't grow forever.
+				recentPurchases: trimRecentPurchases([...purchases.recentPurchases, recentPurchase]),
 			},
 		};
 	},

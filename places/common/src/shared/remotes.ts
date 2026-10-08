@@ -17,7 +17,8 @@ const remotes = Net.CreateDefinitions({
 		[RemoteId.Dispatch]: Definitions.ServerToClientEvent<[actions: BroadcastAction[]]>(),
 		[RemoteId.Start]: Definitions.ClientToServerEvent(),
 	}),
-	[RemoteId.Click]: Definitions.ClientToServerEvent(),
+	// Throttled server side so a client can't flood the server.
+	[RemoteId.Click]: Definitions.ClientToServerEvent<[]>([Net.Middleware.RateLimit({ MaxRequestsPerMinute: 1200 })]),
 });
 
 export default remotes;

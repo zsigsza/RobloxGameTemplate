@@ -1,14 +1,12 @@
+import { MAX_ASPECT_RATIO, BASE_RESOLUTION } from "common/client/ui/constants";
 import { useViewport } from "@rbxts/pretty-react-hooks";
 import Group from "common/client/ui/primitives/group";
 import React from "@rbxts/react";
 
-const MAX_ASPECT_RATIO = 19 / 9;
-const BASE_RESOLUTION = new Vector2(1920, 1020);
-
 type UltraWideContainerProps = React.PropsWithChildren;
 
 /**
- * Creates a 1920x1080 scaling container to handle ultra wide monitors and
+ * Creates a 1920x1080 max-size container to handle ultra wide monitors and
  * screens in a reasonable way. This helps keep UI centered and available for
  * ultra wide screens.
  *

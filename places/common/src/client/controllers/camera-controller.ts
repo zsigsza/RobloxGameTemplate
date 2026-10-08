@@ -3,16 +3,25 @@ import { Controller, OnRender, OnStart } from "@flamework/core";
 import { UserInputService, Workspace } from "@rbxts/services";
 import Spring from "@rbxts/spring";
 
+const BASE_FOV = 70;
+const MAX_FOV = 90;
+const MAX_SPEED = 100;
+
 @Controller({})
 export class CameraController implements OnRender, OnStart {
 	cameraOffset = new Vector3(2, 1, 0);
-
-	constructor(private characterController: CharacterController) {}
 
 	private velocityBasedFOV = true;
 	private velocityBasedCameraDelay = true;
 	private movementTilt = true;
 	private cameraLock = true;
+
+	private fieldOfView = BASE_FOV;
+	private movementTiltCFrame = new CFrame();
+	private assemblyLinearVelocity = Vector3.zero;
+	private readonly velocitySpring = new Spring<Vector3>(Vector3.zero, 8, Vector3.zero, 0.25);
+
+	constructor(private readonly characterController: CharacterController) {}
 
 	onStart() {
 		this.setCameraLock(false);
@@ -30,14 +39,6 @@ export class CameraController implements OnRender, OnStart {
 		this.movementTilt = lock;
 	}
 
-	private baseFOV = 70;
-	private maxSpeed = 100;
-	private maxFOV = 90;
-	private fieldOfView = this.baseFOV;
-
-	private assemblyLinearVelocity = Vector3.zero;
-	private movementTiltCFrame = new CFrame();
-
 	setSubject(subject: BasePart) {
 		const camera = Workspace.CurrentCamera;
 		if (!camera) return;
@@ -48,50 +49,32 @@ export class CameraController implements OnRender, OnStart {
 	}
 
 	onRender(dt: number): void {
-		if (!this.characterController.character) return;
-		if (!this.characterController.humanoid) return;
-		if (!this.characterController.rootPart) return;
-		if (!this.characterController.rootJoint) return;
-		if (!this.characterController.head) return;
-
-		this.setSubject(this.characterController.head);
-
-		const rootPart = this.characterController.rootPart;
-
-		if (this.velocityBasedCameraDelay) {
-			// TODO: Avoid making new springs each time
-			const spring = new Spring<Vector3>(
-				this.assemblyLinearVelocity,
-				8,
-				rootPart.AssemblyLinearVelocity.mul(0.05),
-				0.25,
-			);
-
-			this.assemblyLinearVelocity = spring.update(dt);
-		}
+		const { rootJoint, humanoid, rootPart, head } = this.characterController;
+		if (!humanoid || !rootPart || !rootJoint || !head) return;
 
 		const camera = Workspace.CurrentCamera;
 		if (!camera) return;
 
-		if (this.velocityBasedFOV) {
-			const speed = rootPart.AssemblyLinearVelocity.Magnitude;
+		this.setSubject(head);
 
-			this.fieldOfView = math.lerp(
-				this.fieldOfView,
-				this.baseFOV + (speed / this.maxSpeed) * (this.maxFOV - this.baseFOV),
-				dt,
-			);
+		const velocity = rootPart.AssemblyLinearVelocity;
+
+		if (this.velocityBasedCameraDelay) {
+			this.velocitySpring.goal = velocity.mul(0.05);
+			this.assemblyLinearVelocity = this.velocitySpring.update(dt);
+		}
+
+		if (this.velocityBasedFOV) {
+			const speedAlpha = math.clamp(velocity.Magnitude / MAX_SPEED, 0, 1);
+
+			this.fieldOfView = math.lerp(this.fieldOfView, BASE_FOV + speedAlpha * (MAX_FOV - BASE_FOV), dt);
 			camera.FieldOfView = this.fieldOfView;
 		}
 
-		const humanoid = this.characterController.humanoid;
-		const walkSpeed = humanoid.WalkSpeed;
-		const walkSpeedModifier = (walkSpeed ^ 2) / 8;
-
 		const lookVector = camera.CFrame.LookVector;
-		if (this.movementTilt) {
-			const max = math.min(6 + walkSpeedModifier, 45);
 
+		if (this.movementTilt) {
+			const max = math.min(6 + (humanoid.WalkSpeed ^ 2) / 8, 45);
 			const moveDirection = rootPart.CFrame.VectorToObjectSpace(humanoid.MoveDirection);
 
 			this.movementTiltCFrame = this.movementTiltCFrame.Lerp(
@@ -100,20 +83,21 @@ export class CameraController implements OnRender, OnStart {
 					math.rad(-moveDirection.X) * max,
 					0,
 				),
-				dt * 12,
+				math.min(dt * 12, 1),
 			);
 
-			this.characterController.rootJoint.C0 = CFrame.Angles(math.rad(90), math.rad(180), 0).mul(
-				this.movementTiltCFrame,
-			);
+			rootJoint.C0 = CFrame.Angles(math.rad(90), math.rad(180), 0).mul(this.movementTiltCFrame);
 		}
 
 		if (this.cameraLock) {
-			const flatLookVector = new Vector3(lookVector.X, 0, lookVector.Z).Unit;
-			rootPart.CFrame = rootPart.CFrame.Lerp(
-				new CFrame(rootPart.Position, rootPart.Position.add(flatLookVector)),
-				dt * 18,
-			);
+			// Looking straight up or down leaves no horizontal direction to face.
+			const flatLookVector = new Vector3(lookVector.X, 0, lookVector.Z);
+			if (flatLookVector.Magnitude > 0.001) {
+				rootPart.CFrame = rootPart.CFrame.Lerp(
+					new CFrame(rootPart.Position, rootPart.Position.add(flatLookVector.Unit)),
+					math.min(dt * 18, 1),
+				);
+			}
 
 			camera.PivotTo(
 				camera.CFrame.add(camera.CFrame.VectorToWorldSpace(this.cameraOffset)).sub(this.assemblyLinearVelocity),

@@ -8,17 +8,17 @@ export function receiverMiddleware(): ProducerMiddleware {
 		return () => (dispatch) => dispatch;
 	}
 
+	const storeRemotes = remotes.Client.GetNamespace("store");
+
 	const receiver = createBroadcastReceiver({
 		start: () => {
-			remotes.Client.GetNamespace("store").Get(RemoteId.Start).SendToServer();
+			storeRemotes.Get(RemoteId.Start).SendToServer();
 		},
 	});
 
-	remotes.Client.GetNamespace("store")
-		.Get(RemoteId.Dispatch)
-		.Connect((actions) => {
-			receiver.dispatch(actions);
-		});
+	storeRemotes.Get(RemoteId.Dispatch).Connect((actions) => {
+		receiver.dispatch(actions);
+	});
 
 	return receiver.middleware;
 }

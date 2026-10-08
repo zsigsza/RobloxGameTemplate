@@ -1,24 +1,32 @@
+name: CI
+
 on:
- push:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
- lint: 
-  runs-on: ubuntu-latest
-  steps:
-    - uses: actions/checkout@v4
-    - uses: CompeyDev/setup-rokit@v0.1.2
-    - uses: oven-sh/setup-bun@v2
-      with:
-       bun-version: latest
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: CompeyDev/setup-rokit@v0.1.2
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
-    - name: install packages
-      run: bun i
+      - name: install packages
+        run: bun install --frozen-lockfile
 
-    - name: run linter
-      run: bun run eslint
+      - name: run linter
+        run: bun run eslint
 
-    - name: compile base
-      run: bun compile:base
-    
-    - name: run tests
-      run: bun test:base
+      # `test:base` cleans, compiles and builds the place before running the tests.
+      - name: run tests
+        run: bun run test:base

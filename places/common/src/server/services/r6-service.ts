@@ -1,46 +1,31 @@
-import { InsertService, StarterPlayer, Players } from "@rbxts/services";
-import { getHumanoid } from "common/shared/utils/player";
-import { FORCE_R6 } from "common/shared/constants/flags";
-import { Service, OnStart } from "@flamework/core";
-import { OnPlayerJoin } from "common/server/hooks";
+import { InsertService, StarterPlayer } from "@rbxts/services";
+import { Service } from "@flamework/core";
+
+const BASE_R6_AVATAR_ASSET_ID = 124766567754864;
 
 @Service({})
-export class R6Service implements OnPlayerJoin, OnStart {
-	getBaseR6Avatar() {
+export class R6Service {
+	getBaseR6Avatar(): undefined | Model {
 		try {
-			const asset = InsertService.LoadAsset(124766567754864);
-			const model = asset.FindFirstChildOfClass("Model")?.Clone();
+			const asset = InsertService.LoadAsset(BASE_R6_AVATAR_ASSET_ID);
+			const model = asset.FindFirstChildOfClass("Model");
+			if (model) model.Parent = undefined;
 			asset.Destroy();
 			return model;
-		} catch {
-			return;
+		} catch (err) {
+			warn(`Failed to load the base R6 avatar: ${err}`);
+			return undefined;
 		}
 	}
 
-	getHumanoidDescription(player: Player) {
-		try {
-			return Players.GetHumanoidDescriptionFromUserIdAsync(player.UserId);
-		} catch {
-			return;
-		}
-	}
-
-	onStart() {
-		if (!FORCE_R6) return;
+	/** Replaces the default character with an R6 `StarterCharacter`. Yields. */
+	setR6DefaultCharacter(): boolean {
 		const model = this.getBaseR6Avatar();
-		if (!model) return;
+		if (!model) return false;
+
+		StarterPlayer.FindFirstChild("StarterCharacter")?.Destroy();
 		model.Name = "StarterCharacter";
 		model.Parent = StarterPlayer;
-	}
-
-	onPlayerJoin(player: Player): void {
-		if (!FORCE_R6) return;
-		player.CharacterAdded.Connect((character) => {
-			const [humanoid] = getHumanoid(character);
-			if (!humanoid) return;
-			const description = this.getHumanoidDescription(player);
-			if (!description) return;
-			humanoid.ApplyDescriptionAsync(description);
-		});
+		return true;
 	}
 }

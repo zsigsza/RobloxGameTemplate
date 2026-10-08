@@ -1,8 +1,8 @@
 {
   "name": "robloxts-game-template",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "description": "A multiplace roblox-ts game template using Flamework.",
   "trustedDependencies": [
     "husky"
   ],
@@ -11,10 +11,10 @@
     "lint": "eslint places/*",
     "fix": "eslint --fix places/* ",
     "prepare": "husky",
-    "img:": "asphalt sync",
+    "img": "asphalt sync",
     "img:studio": "asphalt sync studio",
     "img:debug": "asphalt sync debug",
-    "clean": "rm -rf out && find places -type d -name 'out' -exec rm -rf {} +",
+    "clean": "rm -rf out dist places/*/out places/*/dist",
     "compile:base": "cd places/base && rbxtsc --verbose && darklua process out dist --verbose",
     "watch:base": "cd places/base && rbxtsc -w --verbose",
     "build:base": "rojo build -o places/base/build.rbxl places/base && lune run sync-models places/base/build.rbxl base",
@@ -22,10 +22,8 @@
     "extract:base": "lune run extract-models places/base/build.rbxl base",
     "open:base": "xdg-open places/base/build.rbxl",
     "rojo:base": "cd places/base && rojo serve",
-    "test:base": "bun clean && bun compile:base && bun build:base && bun extract:base && lune run client-tests places/base/build.rbxl && lune run server-tests places/base/build.rbxl && lune run client-tests places/base/build.rbxl"
+    "test:base": "bun clean && bun compile:base && bun build:base && bun extract:base && lune run server-tests places/base/build.rbxl && lune run client-tests places/base/build.rbxl"
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
   "commitlint": {
     "extends": [
